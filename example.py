@@ -32,4 +32,3 @@ smsApi.sendSms('This is a test message')
 print 'Response:'
 print smsApi.getResponseCode()
 print smsApi.getResponseMessage()
-print smsApi.getCreditBalance()

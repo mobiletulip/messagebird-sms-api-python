@@ -185,18 +185,3 @@ class MessageBird:
         else:
             return self.httpResponseData
 
-
-    def getCreditBalance(self):
-        """
-        Will return the current credit balance left after sending the messages.
-        This is only available when using XML as a responseType, all others will always return 0!
-        @return: integer The current credit balance after sending the message. (0 when responseType is not XML or an error occurred)
-        """
-        if not self.xmlResponseData == None:
-            creditsTag = self.xmlResponseData.getElementsByTagName('credits')
-            if creditsTag.length > 0:
-                return creditsTag[0].firstChild.data
-
-        # Return 0 in all other cases, because we don't know the current credits balance
-        return 0
-
