@@ -38,6 +38,9 @@ class MessageBird:
     # @var timestamp: datetime: Holds the timestamp to schedule a message, instead of sending it now
     timestamp = None
 
+    # @var test: boolean: Set to true when developing. No actual messages will be send
+    test = False
+
     # @var httpResponseStatus: string: Will hold the response status returned by the SMScity server
     httpResponseStatus = ''
 
@@ -107,6 +110,15 @@ class MessageBird:
         self.responseType = responseType
 
 
+    def setTest(self, testing):
+        """
+        When defined, then the message is not actually sent or scheduled, so no credits are deducted.
+        Validation of the message will take place, and you will also receive a normal response.
+        @param testing: boolean: set to TRUE when testing
+        """
+        self.test = testing
+
+
     def sendSms(self, message):
         """
         Will actualy send the given message to the destinations given using addDestination()
@@ -131,6 +143,10 @@ class MessageBird:
         # If there is a timestamp set, add it to the parameters
         if not self.timestamp == None:
             params.update({'timestamp': self.timestamp})
+
+        # If testing, add it to the parameters
+        if not self.test == True:
+            params.update({'test': self.test})
 
         # urlencode all the paramters
         postParams = urllib.urlencode(params)
