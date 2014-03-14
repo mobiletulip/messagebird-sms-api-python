@@ -145,7 +145,7 @@ class MessageBird:
             params.update({'timestamp': self.timestamp})
 
         # If testing, add it to the parameters
-        if not self.test == True:
+        if self.test == True:
             params.update({'test': self.test})
 
         # urlencode all the paramters
