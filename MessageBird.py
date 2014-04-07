@@ -255,3 +255,14 @@ class MessageBird:
         else:
             return self.httpResponseData
 
+    def getXMLResponseData(self):
+        if not self.xmlResponseData == None:
+            return self.xmlResponseData
+        else:
+            return ''
+
+    def getHTTPResponseData(self):
+        if not self.httpResponseData == None:
+            return self.httpResponseData
+        else:
+            return ''
