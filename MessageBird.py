@@ -223,7 +223,7 @@ class MessageBird:
         # urlencode all the paramters
         postParams = urllib.urlencode(params)
 
-         # Set the HTTP Headers
+        # Set the HTTP Headers
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
 
         httpConnection = httplib.HTTPConnection('api.messagebird.com')
