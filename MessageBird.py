@@ -23,6 +23,10 @@ import urllib
 class MessageBird:
     """ MessageBird Class which will handle sending messages to the MessageBird website using the MessageBird API """
 
+    GATEWAY_VOICE = 8
+    GATEWAY_BASIC = 2
+    GATEWAY_BUSINESS = 1
+    
     # @var sender: mixed: Can be an number (16 numbers) or an text (11 characters)
     sender = ''
 
@@ -53,6 +57,14 @@ class MessageBird:
     # @var xmlResponseData: documentElement: The XML data parsed by the minidom
     xmlResponseData = None
 
+    # @var replacechars: boolean: Replace non GSM-7 characters by appropriate valid GSM-7 characters
+    replacechars = False
+
+    # @var gateway: string: Set the quality of the route that you want to send the message.
+    gateway = None
+
+    # @var gatewayId: integer: Change de route over which the message should be send
+    gatewayId = None
 
     def __init__(self, username, password):
         """
@@ -118,6 +130,32 @@ class MessageBird:
         """
         self.test = testing
 
+    def setReplacechars(self, replacing):
+        """
+        When defined, then the message is not actually sent or scheduled, so no credits are deducted.
+        Validation of the message will take place, and you will also receive a normal response.
+        @param replacing: boolean: Replace non GSM-7 characters by appropriate valid GSM-7 characters
+        """
+        self.replacechars = replacing
+
+    def setGateway(self, gateway):
+        """
+        Set the quality of the route that you want to send the message. See the website for more information
+        8 = Voice (inclusief vaste nummers), 2 = Basic, 1 =Business+
+        @param replacing: boolean: Set the quality of the route that you want to send the message.
+        """
+        self.gateway = gateway
+
+    def setGatewayId(self, gatewayId):
+        """
+        The SMS-route that you wish to use. Adjust the quality of the gateway that you wish 
+        to use to send the SMS. This setting overrides the "standard quality" that you have 
+        set in your account for this message.
+        Default possibilities are 239 for basic, 240 for quality and 8 for voice.
+        @param replacing: numeric : Change de route over which the message should be send.
+        """
+        self.gatewayId = gatewayId
+
 
     def sendSms(self, message):
         """
@@ -147,6 +185,22 @@ class MessageBird:
         # If testing, add it to the parameters
         if self.test == True:
             params.update({'test': self.test})
+
+        # If not replacing characters, add it to the parameters
+        if self.replacechars == False:
+            params.update({'replacechars': self.replacechars})
+
+        # If setting the gateway, add it to the parameters
+        if self.gateway == 'basic':
+            params.update({'gateway': self.GATEWAY_BASIC})
+        elif self.gateway == 'business':
+            params.update({'gateway': self.GATEWAY_BUSINESS})
+        elif self.gateway == 'voice':
+            params.update({'gateway': self.GATEWAY_Voice})
+
+        # If setting the gatewayId, add it to the parameters
+        if not self.gatewayId == None:
+            params.update({'gatewayId': self.gatewayId})
 
         # urlencode all the paramters
         postParams = urllib.urlencode(params)
@@ -201,3 +255,14 @@ class MessageBird:
         else:
             return self.httpResponseData
 
+    def getXMLResponseData(self):
+        if not self.xmlResponseData == None:
+            return self.xmlResponseData
+        else:
+            return ''
+
+    def getHTTPResponseData(self):
+        if not self.httpResponseData == None:
+            return self.httpResponseData
+        else:
+            return ''
