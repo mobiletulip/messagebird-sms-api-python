@@ -327,3 +327,4 @@ class MessageBird:
             return responseCreditsTag[0].firstChild.data
         else:
             return 0
+            
