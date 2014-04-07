@@ -58,7 +58,7 @@ class MessageBird:
     xmlResponseData = None
 
     # @var replacechars: boolean: Replace non GSM-7 characters by appropriate valid GSM-7 characters
-    replacechars = False
+    replacechars = True
 
     # @var gateway: string: Set the quality of the route that you want to send the message.
     gateway = None
@@ -327,4 +327,3 @@ class MessageBird:
             return responseCreditsTag[0].firstChild.data
         else:
             return 0
-            
