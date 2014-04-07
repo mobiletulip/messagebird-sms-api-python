@@ -256,13 +256,74 @@ class MessageBird:
             return self.httpResponseData
 
     def getXMLResponseData(self):
+        """
+        Will return the parsed response data as XML.
+        This is only available when using XML response type
+        @return: string The XML response data
+        """
         if not self.xmlResponseData == None:
             return self.xmlResponseData
         else:
             return ''
 
     def getHTTPResponseData(self):
+        """
+        Will return the raw response data.
+        @return: string The raw response data
+        """
         if not self.httpResponseData == None:
             return self.httpResponseData
         else:
             return ''
+
+    def getHTTPResponseStatus(self):
+        """
+        Will return the response status.
+        @return: string The response status
+        """
+        if not self.httpResponseStatus == None:
+            return self.httpResponseStatus
+        else:
+            return ''
+
+    def getHTTPResponseReason(self):
+        """
+        Will return the response reason.
+        @return: string The raw response data
+        """
+        if not self.httpResponseReason == None:
+            return self.httpResponseReason
+        else:
+            return ''
+
+
+    def getBalance(self):
+        """
+        Will return the number of credits your account has
+        @return: integer The amount of Credits you have
+        """
+        # Set the default parameters that needs to be sent
+        params = {'username': self.username,
+                  'password': self.password}
+        # urlencode all the paramters
+        postParams = urllib.urlencode(params)
+
+        # Set the HTTP Headers
+        headers = {'Content-type': 'application/x-www-form-urlencoded'}
+
+        httpConnection = httplib.HTTPConnection('api.messagebird.com')
+        httpConnection.request('POST', '/api/credits', postParams, headers)
+        httpBalanceResponse = httpConnection.getresponse()
+        # Read the response data/info
+        self.httpBalanceResponseStatus = httpBalanceResponse.status
+        self.httpBalanceResponseReason = httpBalanceResponse.reason
+        self.httpBalanceResponseData = httpBalanceResponse.read()
+
+        # Close the HTTP connection
+        httpConnection.close()
+        self.xmlBalanceResponseData = parseString(self.httpBalanceResponseData).documentElement
+        responseCreditsTag = self.xmlBalanceResponseData.getElementsByTagName('credits')
+        if responseCreditsTag.length > 0:
+            return responseCreditsTag[0].firstChild.data
+        else:
+            return 0
