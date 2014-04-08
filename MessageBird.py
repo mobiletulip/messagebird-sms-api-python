@@ -19,6 +19,7 @@ from xml.dom.minidom import parseString
 # For sending and encoding an HTTP POSTS
 import httplib
 import urllib
+import urlparse
 
 class MessageBird:
     """ MessageBird Class which will handle sending messages to the MessageBird website using the MessageBird API """
@@ -58,13 +59,16 @@ class MessageBird:
     xmlResponseData = None
 
     # @var replacechars: boolean: Replace non GSM-7 characters by appropriate valid GSM-7 characters
-    replacechars = False
+    replacechars = True
 
     # @var gateway: string: Set the quality of the route that you want to send the message.
     gateway = None
 
     # @var gatewayId: integer: Change de route over which the message should be send
     gatewayId = None
+
+    # @var dlrUrl: string: A valid url, including http://, to receive the delivery reports other than default api settings
+    dlrUrl = None
 
     def __init__(self, username, password):
         """
@@ -134,7 +138,7 @@ class MessageBird:
         """
         When defined, then the message is not actually sent or scheduled, so no credits are deducted.
         Validation of the message will take place, and you will also receive a normal response.
-        @param replacing: boolean: Replace non GSM-7 characters by appropriate valid GSM-7 characters
+        @param replacing: boolean Replace non GSM-7 characters by appropriate valid GSM-7 characters
         """
         self.replacechars = replacing
 
@@ -142,7 +146,7 @@ class MessageBird:
         """
         Set the quality of the route that you want to send the message. See the website for more information
         8 = Voice (inclusief vaste nummers), 2 = Basic, 1 =Business+
-        @param replacing: boolean: Set the quality of the route that you want to send the message.
+        @param replacing: boolean Set the quality of the route that you want to send the message.
         """
         self.gateway = gateway
 
@@ -152,10 +156,17 @@ class MessageBird:
         to use to send the SMS. This setting overrides the "standard quality" that you have 
         set in your account for this message.
         Default possibilities are 239 for basic, 240 for quality and 8 for voice.
-        @param replacing: numeric : Change de route over which the message should be send.
+        @param replacing: numeric Change de route over which the message should be send.
         """
         self.gatewayId = gatewayId
 
+    def setDlrUrl(self, dlrUrl):
+        """
+        If you want a dlr notification of the message send to another url then that you 
+        have set on the web site, you can use this parameter.
+        @param dlrUrl: string A valid url, including http:// 
+        """
+        self.dlrUrl = dlrUrl
 
     def sendSms(self, message):
         """
@@ -201,6 +212,13 @@ class MessageBird:
         # If setting the gatewayId, add it to the parameters
         if not self.gatewayId == None:
             params.update({'gatewayId': self.gatewayId})
+
+        # If setting the dlrUrl, add it to the parameters
+        if not self.dlrUrl == None:
+            urlcheck = urlparse.urlparse(self.dlrUrl)
+            if urlcheck.scheme in ['http','https']:
+                params.update({'dlrUrl': self.dlrUrl})
+
 
         # urlencode all the paramters
         postParams = urllib.urlencode(params)
@@ -256,13 +274,74 @@ class MessageBird:
             return self.httpResponseData
 
     def getXMLResponseData(self):
+        """
+        Will return the parsed response data as XML.
+        This is only available when using XML response type
+        @return: string The XML response data
+        """
         if not self.xmlResponseData == None:
             return self.xmlResponseData
         else:
             return ''
 
     def getHTTPResponseData(self):
+        """
+        Will return the raw response data.
+        @return: string The raw response data
+        """
         if not self.httpResponseData == None:
             return self.httpResponseData
         else:
             return ''
+
+    def getHTTPResponseStatus(self):
+        """
+        Will return the response status.
+        @return: string The response status
+        """
+        if not self.httpResponseStatus == None:
+            return self.httpResponseStatus
+        else:
+            return ''
+
+    def getHTTPResponseReason(self):
+        """
+        Will return the response reason.
+        @return: string The raw response data
+        """
+        if not self.httpResponseReason == None:
+            return self.httpResponseReason
+        else:
+            return ''
+
+
+    def getBalance(self):
+        """
+        Will return the number of credits your account has
+        @return: integer The amount of Credits you have
+        """
+        # Set the default parameters that needs to be sent
+        params = {'username': self.username,
+                  'password': self.password}
+        # urlencode all the paramters
+        postParams = urllib.urlencode(params)
+
+        # Set the HTTP Headers
+        headers = {'Content-type': 'application/x-www-form-urlencoded'}
+
+        httpConnection = httplib.HTTPConnection('api.messagebird.com')
+        httpConnection.request('POST', '/api/credits', postParams, headers)
+        httpBalanceResponse = httpConnection.getresponse()
+        # Read the response data/info
+        self.httpBalanceResponseStatus = httpBalanceResponse.status
+        self.httpBalanceResponseReason = httpBalanceResponse.reason
+        self.httpBalanceResponseData = httpBalanceResponse.read()
+
+        # Close the HTTP connection
+        httpConnection.close()
+        self.xmlBalanceResponseData = parseString(self.httpBalanceResponseData).documentElement
+        responseCreditsTag = self.xmlBalanceResponseData.getElementsByTagName('credits')
+        if responseCreditsTag.length > 0:
+            return responseCreditsTag[0].firstChild.data
+        else:
+            return 0
