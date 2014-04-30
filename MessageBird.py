@@ -32,13 +32,14 @@ try:
 except ImportError:
     from urllib import parse as urlparse
 
+
 class MessageBird:
     """ MessageBird Class which will handle sending messages to the MessageBird website using the MessageBird API """
 
     GATEWAY_VOICE = 8
     GATEWAY_BASIC = 2
     GATEWAY_BUSINESS = 1
-    
+
     # @var sender: mixed: Can be an number (16 numbers) or an text (11 characters)
     sender = ''
 
@@ -91,14 +92,12 @@ class MessageBird:
         self.password = password
         self.destination = []
 
-
     def addDestination(self, destination):
         """
         Adds an MSISDN to the destination array
         @param destination: integer The destination MSISDN (Mobile number)
         """
         self.destination.append(destination)
-
 
     def setReference(self, reference):
         """
@@ -107,7 +106,6 @@ class MessageBird:
         """
         self.reference = reference
 
-
     def setSender(self, sender):
         """
         Sets the sender. This can be an MSISDN (Mobile number) or an Text.
@@ -115,7 +113,6 @@ class MessageBird:
         @param sender: mixed The sender of the message which the recipient will see.
         """
         self.sender = sender
-
 
     def setTimestamp(self, scheduleDateTime):
         """
@@ -127,7 +124,6 @@ class MessageBird:
             # Our API needs the timestamp in YearMonthDayHourMinute so we convert it to this format
             self.timestamp = scheduleDateTime.strftime('%Y%m%d%H%M')
 
-
     def setResponseType(self, responseType):
         """
         Sets the response type to be used for retrieveing the response in specific manner.
@@ -135,7 +131,6 @@ class MessageBird:
         @param responseType: string Could be XML, PLAIN or SIMPLE (Default: XML)
         """
         self.responseType = responseType
-
 
     def setTest(self, testing):
         """
@@ -163,8 +158,8 @@ class MessageBird:
 
     def setGatewayId(self, gatewayId):
         """
-        The SMS-route that you wish to use. Adjust the quality of the gateway that you wish 
-        to use to send the SMS. This setting overrides the "standard quality" that you have 
+        The SMS-route that you wish to use. Adjust the quality of the gateway that you wish
+        to use to send the SMS. This setting overrides the "standard quality" that you have
         set in your account for this message.
         Default possibilities are 239 for basic, 240 for quality and 8 for voice.
         @param replacing: numeric Change de route over which the message should be send.
@@ -173,9 +168,9 @@ class MessageBird:
 
     def setDlrUrl(self, dlrUrl):
         """
-        If you want a dlr notification of the message send to another url then that you 
+        If you want a dlr notification of the message send to another url then that you
         have set on the web site, you can use this parameter.
-        @param dlrUrl: string A valid url, including http:// 
+        @param dlrUrl: string A valid url, including http://
         """
         self.dlrUrl = dlrUrl
 
@@ -193,23 +188,22 @@ class MessageBird:
                   'destination': destinations,
                   'responsetype': self.responseType,
                   'sender': self.sender,
-                  'body': message
-                 }
+                  'body': message}
 
         # If there is a reference set, add it to the parameters
-        if not self.reference == None:
+        if self.reference is not None:
             params.update({'reference': self.reference})
 
         # If there is a timestamp set, add it to the parameters
-        if not self.timestamp == None:
+        if self.timestamp is not None:
             params.update({'timestamp': self.timestamp})
 
         # If testing, add it to the parameters
-        if self.test == True:
+        if self.test is True:
             params.update({'test': self.test})
 
         # If not replacing characters, add it to the parameters
-        if self.replacechars == False:
+        if self.replacechars is False:
             params.update({'replacechars': self.replacechars})
 
         # If setting the gateway, add it to the parameters
@@ -221,15 +215,14 @@ class MessageBird:
             params.update({'gateway': self.GATEWAY_Voice})
 
         # If setting the gatewayId, add it to the parameters
-        if not self.gatewayId == None:
+        if self.gatewayId is not None:
             params.update({'gatewayId': self.gatewayId})
 
         # If setting the dlrUrl, add it to the parameters
-        if not self.dlrUrl == None:
+        if self.dlrUrl is not None:
             urlcheck = urlparse.urlparse(self.dlrUrl)
-            if urlcheck.scheme in ['http','https']:
+            if urlcheck.scheme in ['http', 'https']:
                 params.update({'dlrUrl': self.dlrUrl})
-
 
         # urlencode all the paramters
         postParams = urlencode(params)
@@ -252,14 +245,13 @@ class MessageBird:
         if self.responseType == 'XML':
             self.xmlResponseData = parseString(self.httpResponseData).documentElement
 
-
     def getResponseCode(self):
         """
         Will return the response code which is returned after sending the the message.
         When the responseType is set to XML there can could be more data to be retrieved.
         @return: string The response code
         """
-        if not self.xmlResponseData == None:
+        if self.xmlResponseData is not None:
             responseCodeTag = self.xmlResponseData.getElementsByTagName('responseCode')
             if responseCodeTag.length > 0:
                 return responseCodeTag[0].firstChild.data
@@ -268,14 +260,13 @@ class MessageBird:
         else:
             return self.httpResponseData
 
-
     def getResponseMessage(self):
         """
         Will return the response message.
         This is only available when using PLAIN or XML, when using SIMPLE, it will return the responseCode
         @return: string The response message
         """
-        if not self.xmlResponseData == None:
+        if self.xmlResponseData is not None:
             responseMessageTag = self.xmlResponseData.getElementsByTagName('responseMessage')
             if responseMessageTag.length > 0:
                 return responseMessageTag[0].firstChild.data
@@ -290,7 +281,7 @@ class MessageBird:
         This is only available when using XML response type
         @return: string The XML response data
         """
-        if not self.xmlResponseData == None:
+        if self.xmlResponseData is not None:
             return self.xmlResponseData
         else:
             return ''
@@ -300,7 +291,7 @@ class MessageBird:
         Will return the raw response data.
         @return: string The raw response data
         """
-        if not self.httpResponseData == None:
+        if self.httpResponseData is not None:
             return self.httpResponseData
         else:
             return ''
@@ -310,7 +301,7 @@ class MessageBird:
         Will return the response status.
         @return: string The response status
         """
-        if not self.httpResponseStatus == None:
+        if self.httpResponseStatus is not None:
             return self.httpResponseStatus
         else:
             return ''
@@ -320,11 +311,10 @@ class MessageBird:
         Will return the response reason.
         @return: string The raw response data
         """
-        if not self.httpResponseReason == None:
+        if self.httpResponseReason is not None:
             return self.httpResponseReason
         else:
             return ''
-
 
     def getBalance(self):
         """
