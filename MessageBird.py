@@ -17,9 +17,20 @@ from datetime import \
 from xml.dom.minidom import parseString
 
 # For sending and encoding an HTTP POSTS
-import httplib
-import urllib
-import urlparse
+try:
+    import httplib
+except ImportError:
+    from http import client as httplib
+
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
+
+try:
+    import urlparse
+except ImportError:
+    from urllib import parse as urlparse
 
 class MessageBird:
     """ MessageBird Class which will handle sending messages to the MessageBird website using the MessageBird API """
@@ -221,7 +232,7 @@ class MessageBird:
 
 
         # urlencode all the paramters
-        postParams = urllib.urlencode(params)
+        postParams = urlencode(params)
 
         # Set the HTTP Headers
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
@@ -324,7 +335,7 @@ class MessageBird:
         params = {'username': self.username,
                   'password': self.password}
         # urlencode all the paramters
-        postParams = urllib.urlencode(params)
+        postParams = urlencode(params)
 
         # Set the HTTP Headers
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
